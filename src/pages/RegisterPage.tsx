@@ -27,6 +27,13 @@ export function RegisterPage() {
             Confirmar Contrasena
             <input type="password" placeholder="******" />
           </label>
+          <label className="auth-checkbox">
+            <input type="checkbox" required />
+            <span>
+              Acepto los{' '}
+              <Link to="/terminos-y-condiciones">terminos y condiciones</Link> y la politica de privacidad.
+            </span>
+          </label>
           <button type="submit" className="button button-primary btn-full">
             Crear Cuenta
           </button>

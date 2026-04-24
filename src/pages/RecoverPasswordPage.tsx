@@ -1,29 +1,22 @@
 import { Link } from 'react-router-dom'
 
-export function LoginPage() {
+export function RecoverPasswordPage() {
   return (
     <main className="auth-shell auth-shell-login">
       <section className="auth-card">
-        <h1>Iniciar Sesion</h1>
-        <p>Accede a tu cuenta de La Fachada</p>
+        <h1>Recuperar Contrasena</h1>
+        <p>Te enviaremos un enlace para restaurar el acceso a tu cuenta.</p>
         <form className="auth-form">
           <label>
             Correo Electronico
             <input type="email" placeholder="tu@email.com" />
           </label>
-          <label>
-            Contrasena
-            <input type="password" placeholder="******" />
-          </label>
           <button type="submit" className="button button-primary btn-full">
-            Iniciar Sesion
+            Enviar enlace
           </button>
         </form>
         <p className="auth-link-row">
-          <Link to="/recuperar-contrasena">Olvidaste tu contrasena?</Link>
-        </p>
-        <p className="auth-link-row">
-          No tienes una cuenta? <Link to="/registrarse">Registrate</Link>
+          <Link to="/iniciar-sesion">Volver a iniciar sesion</Link>
         </p>
       </section>
     </main>
