@@ -545,6 +545,44 @@
   font-weight: 700;
 }
 
+.credenciales-prueba {
+  margin: 20px 0;
+  padding: 16px;
+  background: #f0f4f8;
+  border-left: 4px solid #2563eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.credenciales-prueba p {
+  margin: 8px 0;
+  text-align: left;
+}
+
+.credenciales-prueba strong {
+  color: #0f172a;
+}
+
+.credenciales-prueba code {
+  background: #e0e8f0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.error-message {
+  margin: 12px 0;
+  padding: 12px;
+  background: #fee;
+  border: 1px solid #f44336;
+  border-radius: 6px;
+  color: #c62828;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
 .terms-card {
   margin-top: 16px;
   padding: 24px;

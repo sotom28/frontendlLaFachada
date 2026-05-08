@@ -7,6 +7,10 @@ import { RecoverPasswordPage } from './pages/RecoverPasswordPage'
 import { PropertiesPage } from './pages/PropertiesPage.tsx'
 import { RegisterPage } from './pages/RegisterPage.tsx'
 import { TermsPage } from './pages/TermsPage'
+import { MenuCliente } from './pages/paginacliente/menucliente.tsx'
+import { PropiedadPage } from './pages/paginacliente/propiedad.tsx'
+import { MenuAdmin } from './pages/PaginaAdmin/menuadmin'
+import { MenuAgente } from './pages/pagiinaAgente/menuAgente'
 
 export const router = createBrowserRouter([
   {
@@ -46,5 +50,21 @@ export const router = createBrowserRouter([
         element: <Navigate to="/" replace />,
       },
     ],
+  },
+  {
+    path: '/cliente-menu',
+    element: <MenuCliente />,
+  },
+  {
+    path: '/agregar-propiedad',
+    element: <PropiedadPage />,
+  },
+  {
+    path: '/admin',
+    element: <MenuAdmin />,
+  },
+  {
+    path: '/agent-menu',
+    element: <MenuAgente />,
   },
 ])
