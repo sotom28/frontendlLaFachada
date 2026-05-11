@@ -1,18 +1,75 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { properties } from '../data/properties'
+import { useAuth } from '../context/AuthContext'
 
-const featured = properties.slice(0, 3)
+interface Publicacion {
+  idPublicacion: number
+  titulo: string
+  precio: number
+  ciudad: string
+  habitaciones: number
+  banos: number
+  metraje: number
+}
+
+// Tones for styling the empty images, same as defined in App.css
+const tones = ['tone-a', 'tone-b', 'tone-c', 'tone-d', 'tone-e', 'tone-f']
 
 export function HomePage() {
+  const [publicaciones, setPublicaciones] = useState<Publicacion[]>([])
+  const [loading, setLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState('')
+
+  const { token } = useAuth()
+
+  useEffect(() => {
+    const fetchPublicaciones = async () => {
+      try {
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        }
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`
+        }
+
+        const response = await fetch('http://localhost:3000/api/v1/views/publicaciones-containers', {
+          headers
+        })
+        
+        const contentType = response.headers.get('content-type')
+        
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json()
+          if (Array.isArray(data)) {
+            // Take only the first 3 as requested
+            setPublicaciones(data.slice(0, 3))
+          } else {
+            setErrorMsg('No hay publicaciones disponibles')
+          }
+        } else {
+          const text = await response.text()
+          setErrorMsg(text || 'No hay publicaciones disponibles')
+        }
+      } catch (error) {
+        setErrorMsg('No hay publicaciones disponibles')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPublicaciones()
+  }, [])
+
   return (
     <main className="page-shell">
       <section className="hero-banner">
         <div className="hero-overlay" />
         <div className="hero-content">
           <h1>Encuentra Tu Hogar Perfecto</h1>
-          <p>Mas de 1,000 propiedades exclusivas a tu alcance</p>
+          <p>Más de 1,000 propiedades exclusivas a tu alcance</p>
           <div className="search-strip">
-            <input type="text" placeholder="Buscar por ubicacion o tipo de propiedad" />
+            <input type="text" placeholder="Buscar por ubicación o tipo de propiedad" />
             <button type="button" className="button button-primary">
               Buscar
             </button>
@@ -28,15 +85,15 @@ export function HomePage() {
         <div className="services-grid">
           <article className="service-card">
             <h3>Compra</h3>
-            <p>Encuentra la propiedad perfecta con nuestra amplia seleccion.</p>
+            <p>Encuentra la propiedad perfecta con nuestra amplia selección.</p>
           </article>
           <article className="service-card">
             <h3>Venta</h3>
             <p>Maximiza el valor de tu propiedad con nuestros expertos.</p>
           </article>
           <article className="service-card">
-            <h3>Asesoria</h3>
-            <p>Orientacion profesional en cada paso del proceso.</p>
+            <h3>Asesoría</h3>
+            <p>Orientación profesional en cada paso del proceso.</p>
           </article>
         </div>
       </section>
@@ -48,32 +105,47 @@ export function HomePage() {
             Ver todas
           </Link>
         </div>
-        <div className="property-grid-cards">
-          {featured.map((property) => (
-            <article key={property.id} className="property-card-modern">
-              <div className={`property-image ${property.tone}`}>
-                <span className="property-price">{property.price}</span>
-              </div>
-              <div className="property-body">
-                <h3>{property.title}</h3>
-                <p>{property.location}</p>
-                <div className="property-meta">
-                  <span>{property.beds} hab</span>
-                  <span>{property.baths} banos</span>
-                  <span>{property.area} m2</span>
+
+        {loading ? (
+          <p style={{ textAlign: 'center', padding: '20px' }}>Cargando publicaciones...</p>
+        ) : errorMsg || publicaciones.length === 0 ? (
+          <p style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>
+            {errorMsg || 'No hay publicaciones disponibles'}
+          </p>
+        ) : (
+          <div className="property-grid-cards">
+            {publicaciones.map((pub, index) => (
+              <article key={pub.idPublicacion} className="property-card-modern">
+                <div className={`property-image ${tones[index % tones.length]}`}>
+                  <span className="property-price">
+                    {new Intl.NumberFormat('es-CO', { 
+                      style: 'currency', 
+                      currency: 'COP',
+                      maximumFractionDigits: 0 
+                    }).format(pub.precio)}
+                  </span>
                 </div>
-                <button type="button" className="button button-primary btn-full">
-                  Ver Detalles
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+                <div className="property-body">
+                  <h3>{pub.titulo}</h3>
+                  <p>{pub.ciudad}</p>
+                  <div className="property-meta">
+                    <span>{pub.habitaciones} hab</span>
+                    <span>{pub.banos} baños</span>
+                    <span>{pub.metraje} m²</span>
+                  </div>
+                  <Link to={`/propiedades/${pub.idPublicacion}`} className="button button-primary btn-full">
+                    Ver Detalles
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="cta-band">
-        <h2>Listo para Encontrar tu Hogar?</h2>
-        <p>Nuestro equipo de expertos esta aqui para ayudarte en cada paso</p>
+        <h2>¿Listo para Encontrar tu Hogar?</h2>
+        <p>Nuestro equipo de expertos está aquí para ayudarte en cada paso</p>
         <div className="cta-actions">
           <Link to="/propiedades" className="button button-light">
             Ver Propiedades
@@ -88,10 +160,10 @@ export function HomePage() {
         <div className="footer-grid">
           <div>
             <h3>La Fachada</h3>
-            <p>Tu socio de confianza en bienes raices.</p>
+            <p>Tu socio de confianza en bienes raíces.</p>
           </div>
           <div>
-            <h4>Enlaces Rapidos</h4>
+            <h4>Enlaces Rápidos</h4>
             <ul>
               <li>
                 <Link to="/">Inicio</Link>

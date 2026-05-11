@@ -1,5 +1,6 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import logoLaFachada from '../assets/logolafachada.webp'
+import { useAuth } from '../context/AuthContext'
 
 const navItems = [
   { label: 'Inicio', to: '/' },
@@ -8,6 +9,14 @@ const navItems = [
 ]
 
 export function MainLayout() {
+  const { user, isAuthenticated, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/iniciar-sesion')
+  }
+
   return (
     <div className="app-layout">
       <header className="site-header">
@@ -29,12 +38,24 @@ export function MainLayout() {
                 {item.label}
               </NavLink>
             ))}
-            <NavLink to="/iniciar-sesion" className="route-link route-link-ghost">
-              Iniciar Sesion
-            </NavLink>
-            <NavLink to="/registrarse" className="route-link route-link-cta">
-              Registrarse
-            </NavLink>
+            
+            {!isAuthenticated ? (
+              <>
+                <NavLink to="/iniciar-sesion" className="route-link route-link-ghost">
+                  Iniciar Sesión
+                </NavLink>
+                <NavLink to="/registrarse" className="route-link route-link-cta">
+                  Registrarse
+                </NavLink>
+              </>
+            ) : (
+              <div className="user-nav">
+                <span className="user-name">Hola, {user?.nombre}</span>
+                <button onClick={handleLogout} className="route-link route-link-ghost">
+                  Cerrar Sesión
+                </button>
+              </div>
+            )}
           </nav>
         </div>
       </header>

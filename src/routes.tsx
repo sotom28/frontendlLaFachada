@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage.tsx'
 import { LoginPage } from './pages/LoginPage.tsx'
 import { RecoverPasswordPage } from './pages/RecoverPasswordPage'
 import { PropertiesPage } from './pages/PropertiesPage.tsx'
+import { PropertyDetailPage } from './pages/PropertyDetailPage.tsx'
 import { RegisterPage } from './pages/RegisterPage.tsx'
 import { TermsPage } from './pages/TermsPage'
 
@@ -20,6 +21,10 @@ export const router = createBrowserRouter([
       {
         path: 'propiedades',
         element: <PropertiesPage />,
+      },
+      {
+        path: 'propiedades/:id',
+        element: <PropertyDetailPage />,
       },
       {
         path: 'contacto',
