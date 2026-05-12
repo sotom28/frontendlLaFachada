@@ -1,6 +1,6 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom'
 import { MainLayout } from './layouts/MainLayout.tsx'
-import { ContactPage } from './pages/ContactPage.tsx'
+import { CreatePropertyPage } from './pages/CreatePropertyPage.tsx'
 import { HomePage } from './pages/HomePage.tsx'
 import { LoginPage } from './pages/LoginPage.tsx'
 import { RecoverPasswordPage } from './pages/RecoverPasswordPage'
@@ -27,8 +27,8 @@ export const router = createBrowserRouter([
         element: <PropertyDetailPage />,
       },
       {
-        path: 'contacto',
-        element: <ContactPage />,
+        path: 'crear-propiedad',
+        element: <CreatePropertyPage />,
       },
       {
         path: 'iniciar-sesion',

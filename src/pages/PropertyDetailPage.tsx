@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 interface Resena {
@@ -16,6 +16,9 @@ interface DetallePublicacion {
   precio: number
   fechaPublicacion: string
   nombreVendedor: string
+  vendedorId: number
+  vendedor_id?: number
+  idVendedor?: number
   propiedad: {
     id: number
     direccion: string
@@ -32,6 +35,7 @@ const tones = ['tone-a', 'tone-b', 'tone-c', 'tone-d', 'tone-e', 'tone-f']
 
 export function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [data, setData] = useState<DetallePublicacion | null>(null)
   const [loading, setLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
@@ -40,6 +44,7 @@ export function PropertyDetailPage() {
   const [newReview, setNewReview] = useState({ comentario: '', calificacion: 5 })
   const [submittingReview, setSubmittingReview] = useState(false)
   const [reviewMessage, setReviewMessage] = useState({ type: '', text: '' })
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const fetchDetalle = async () => {
     try {
@@ -66,7 +71,14 @@ export function PropertyDetailPage() {
       }
 
       const json = await response.json()
-      setData(json)
+      
+      // Normalización para asegurar que vendedorId exista independientemente del formato del backend
+      const normalizedData = {
+        ...json,
+        vendedorId: json.vendedorId ?? json.vendedor_id ?? json.idVendedor
+      }
+      
+      setData(normalizedData)
     } catch (error) {
       setErrorMsg('Error al conectar con el servidor')
     } finally {
@@ -117,6 +129,41 @@ export function PropertyDetailPage() {
     }
   }
 
+  const handleDelete = async () => {
+    if (!data || !user) return
+
+    const confirmDelete = window.confirm('¿Estás seguro de que deseas eliminar esta publicación? Esta acción no se puede deshacer.')
+    if (!confirmDelete) return
+
+    setIsDeleting(true)
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/v1/publicacion/eliminar-cascada/${data.idPublicacion}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          idPublicacion: data.idPublicacion,
+          vendedorId: user.idUsuario
+        })
+      })
+
+      if (response.ok) {
+        alert('Publicación eliminada exitosamente')
+        navigate('/propiedades')
+      } else {
+        const errData = await response.json()
+        alert(errData.message || 'Error al eliminar la publicación')
+      }
+    } catch (error) {
+      alert('Error de conexión al intentar eliminar')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   if (loading) {
     return (
       <main className="page-shell page-light">
@@ -160,6 +207,28 @@ export function PropertyDetailPage() {
           <div className="detail-main-info">
             <h1>{data.titulo}</h1>
             <p className="detail-location">{data.propiedad.direccion}, {data.propiedad.ciudad}</p>
+            
+            {isAuthenticated && (user?.idRol === 1) &&  (
+              <div style={{ marginBottom: '20px' }}>
+                <button 
+                  onClick={handleDelete} 
+                  className="button" 
+                  disabled={isDeleting}
+                  style={{ 
+                    backgroundColor: '#ef4444', 
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isDeleting ? 'Eliminando...' : '🗑️ Eliminar Publicación'}
+                </button>
+              </div>
+            )}
+
             <div className="detail-meta-strip">
               <div className="meta-item">
                 <span className="meta-value">{data.propiedad.habitaciones}</span>

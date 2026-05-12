@@ -5,7 +5,6 @@ import { useAuth } from '../context/AuthContext'
 const navItems = [
   { label: 'Inicio', to: '/' },
   { label: 'Propiedades', to: '/propiedades' },
-  { label: 'Contacto', to: '/contacto' },
 ]
 
 export function MainLayout() {
@@ -38,6 +37,17 @@ export function MainLayout() {
                 {item.label}
               </NavLink>
             ))}
+
+            {isAuthenticated && user?.idRol === 1 && (
+              <NavLink 
+                to="/crear-propiedad" 
+                className={({ isActive }) =>
+                  isActive ? 'route-link route-link-active' : 'route-link'
+                }
+              >
+                Crear Publicación
+              </NavLink>
+            )}
             
             {!isAuthenticated ? (
               <>

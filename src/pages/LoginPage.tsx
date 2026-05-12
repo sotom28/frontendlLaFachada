@@ -38,7 +38,7 @@ export function LoginPage() {
 
       if (response.ok) {
         // Successful login: data.usuario contains {idUsuario, nombre, email}, data.token contains JWT
-        login(data.usuario, data.token)
+        await login(data.usuario, data.token)
         navigate('/') // Redirect to home
       } else {
         setError(data.message || 'Credenciales incorrectas')

@@ -1,15 +1,23 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 interface User {
   idUsuario: number;
   nombre: string;
   email: string;
+  idRol: number;
+  id_rol?: number;
+  id_usuario?: number;
+  rol?: {
+    idRol?: number;
+    id_rol?: number;
+    nombre?: string;
+  };
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (userData: User, token: string) => void;
+  login: (userData: User, token: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -23,10 +31,14 @@ const setCookie = (name: string, value: string, days = 7) => {
 };
 
 const getCookie = (name: string) => {
-  return document.cookie.split('; ').reduce((r, v) => {
-    const parts = v.split('=');
-    return parts[0] === name ? decodeURIComponent(parts[1]) : r;
-  }, '');
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+  }
+  return null;
 };
 
 const deleteCookie = (name: string) => {
@@ -38,20 +50,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load session from cookies on mount
+    // Load session from cookies on mount safely
     const savedUser = getCookie('auth_user');
     const savedToken = getCookie('auth_token');
     
     if (savedUser && savedToken) {
-      setUser(JSON.parse(savedUser));
-      setToken(savedToken);
+      try {
+        setUser(JSON.parse(savedUser));
+        setToken(savedToken);
+      } catch (e) {
+        console.error("Error parsing saved user", e);
+        deleteCookie('auth_user');
+        deleteCookie('auth_token');
+      }
     }
   }, []);
 
-  const login = (userData: User, token: string) => {
-    setUser(userData);
+  const login = async (userData: User, token: string) => {
+    try {
+      // Usamos el idUsuario que viene del login inicial para consultar el perfil completo
+      const response = await fetch(`http://localhost:3000/users/${userData.idUsuario}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const rawUser = await response.json();
+        
+        // Normalización para soportar la estructura anidada del backend:
+        // rol: { idRol: 1, nombre: "ADMIN" }
+        const normalizedUser: User = {
+          ...rawUser,
+          idRol: rawUser.idRol ?? rawUser.rol?.idRol ?? rawUser.id_rol ?? rawUser.rol?.id_rol,
+          idUsuario: rawUser.idUsuario ?? rawUser.id_usuario
+        };
+
+        setUser(normalizedUser);
+        setCookie('auth_user', JSON.stringify(normalizedUser));
+      } else {
+        // Fallback en caso de error en el endpoint de perfil
+        setUser(userData);
+        setCookie('auth_user', JSON.stringify(userData));
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      setUser(userData);
+      setCookie('auth_user', JSON.stringify(userData));
+    }
+
     setToken(token);
-    setCookie('auth_user', JSON.stringify(userData));
     setCookie('auth_token', token);
   };
 

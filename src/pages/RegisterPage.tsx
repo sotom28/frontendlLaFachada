@@ -67,7 +67,7 @@ export function RegisterPage() {
         const loginData = await loginResponse.json()
 
         if (loginResponse.ok) {
-          login(loginData.usuario, loginData.token)
+          await login(loginData.usuario, loginData.token)
           navigate('/') // Redirect to home
         } else {
           setMessage({ type: 'success', text: 'Registro exitoso. Por favor inicia sesión.' })
