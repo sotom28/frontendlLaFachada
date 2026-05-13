@@ -10,6 +10,7 @@ interface Publicacion {
   habitaciones: number
   banos: number
   metraje: number
+  estado?: string
 }
 
 // Tones for styling the empty images, same as defined in App.css
@@ -42,8 +43,16 @@ export function HomePage() {
         if (contentType && contentType.includes('application/json')) {
           const data = await response.json()
           if (Array.isArray(data)) {
-            // Take only the first 3 as requested
-            setPublicaciones(data.slice(0, 3))
+            // Normalize and Filter out sold properties and take only the first 3
+            const activePublicaciones = data
+              .map((pub: any) => ({
+                ...pub,
+                idPublicacion: pub.idPublicacion ?? pub.idpublicacion,
+                estado: pub.estado?.toLowerCase()
+              }))
+              .filter((pub: any) => pub.estado !== 'vendido')
+            
+            setPublicaciones(activePublicaciones.slice(0, 3))
           } else {
             setErrorMsg('No hay publicaciones disponibles')
           }

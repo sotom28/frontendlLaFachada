@@ -19,6 +19,7 @@ interface DetallePublicacion {
   vendedorId: number
   vendedor_id?: number
   idVendedor?: number
+  estado?: string
   propiedad: {
     id: number
     direccion: string
@@ -27,6 +28,7 @@ interface DetallePublicacion {
     banos: number
     metraje: number
     tipo: string
+    estadoPropiedad: number
   }
   resenas: Resena[]
 }
@@ -56,26 +58,37 @@ export function PropertyDetailPage() {
         headers['Authorization'] = `Bearer ${token}`
       }
 
-      const response = await fetch(`http://localhost:3000/api/v1/views/publicacion-detalle/${id}`, {
-        headers
-      })
+      // Realizamos ambas peticiones en paralelo para eficiencia
+      const [viewRes, baseRes] = await Promise.all([
+        fetch(`http://localhost:3000/api/v1/views/publicacion-detalle/${id}`, { headers }),
+        fetch(`http://localhost:3000/api/v1/publicacion/${id}`, { headers })
+      ]);
       
-      if (response.status === 404) {
-        const text = await response.text()
-        setErrorMsg(text || 'Publicación no encontrada')
+      if (viewRes.status === 404) {
+        setErrorMsg('Publicación no encontrada')
         return
       }
 
-      if (!response.ok) {
-        throw new Error('Error al obtener el detalle')
-      }
+      if (!viewRes.ok) throw new Error('Error al obtener el detalle')
 
-      const json = await response.json()
+      const viewData = await viewRes.json()
+      let baseData: any = {}
       
-      // Normalización para asegurar que vendedorId exista independientemente del formato del backend
+      try {
+        if (baseRes.ok) baseData = await baseRes.json()
+      } catch (e) { console.error("Error parsing base publication", e) }
+
+      // Combinamos la información, priorizando el vendedorId de la base de datos
       const normalizedData = {
-        ...json,
-        vendedorId: json.vendedorId ?? json.vendedor_id ?? json.idVendedor
+        ...viewData,
+        estado: (baseData.estado ?? viewData.estado)?.toLowerCase(),
+        vendedorId: Number(baseData.vendedorId ?? baseData.idVendedor ?? viewData.vendedorId ?? viewData.vendedor_id ?? 0),
+        propiedad: {
+          ...viewData.propiedad,
+          idEstadoPropiedad: Number(baseData.idEstadoPropiedad ?? baseData.propiedad?.idEstadoPropiedad ?? viewData.propiedad?.idEstadoPropiedad ?? 1),
+          // Ensure estadoPropiedad is also updated if it's used in the UI
+          estadoPropiedad: Number(baseData.idEstadoPropiedad ?? baseData.propiedad?.idEstadoPropiedad ?? viewData.propiedad?.idEstadoPropiedad ?? viewData.propiedad?.estadoPropiedad ?? 1)
+        }
       }
       
       setData(normalizedData)
@@ -89,6 +102,17 @@ export function PropertyDetailPage() {
   useEffect(() => {
     if (id) fetchDetalle()
   }, [id, token])
+
+  // Debug logs for ownership comparison
+  useEffect(() => {
+    if (data && user) {
+      console.log('DEBUG: Comparación de autoría');
+      console.log('Usuario logueado:', user);
+      console.log('ID Usuario (user.idUsuario):', user.idUsuario);
+      console.log('Detalle Publicación (vendedor):', data.vendedorId);
+      console.log('¿Es dueño?:', user.idUsuario === data.vendedorId);
+    }
+  }, [data, user])
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -208,7 +232,7 @@ export function PropertyDetailPage() {
             <h1>{data.titulo}</h1>
             <p className="detail-location">{data.propiedad.direccion}, {data.propiedad.ciudad}</p>
             
-            {isAuthenticated && (user?.idRol === 1) &&  (
+            {isAuthenticated && user?.idRol === 1 && user?.idUsuario === data.vendedorId && (
               <div style={{ marginBottom: '20px' }}>
                 <button 
                   onClick={handleDelete} 
@@ -229,6 +253,7 @@ export function PropertyDetailPage() {
               </div>
             )}
 
+
             <div className="detail-meta-strip">
               <div className="meta-item">
                 <span className="meta-value">{data.propiedad.habitaciones}</span>
@@ -247,6 +272,34 @@ export function PropertyDetailPage() {
                 <span className="meta-label">Tipo</span>
               </div>
             </div>
+
+            {/* Opción de Pago si no es el dueño y no está vendida */}
+            {isAuthenticated && user?.idUsuario !== data.vendedorId && (
+              <div style={{ marginTop: '24px' }}>
+                {data.propiedad.estadoPropiedad === 2 || data.estado === 'vendido' ? (
+                  <div style={{ 
+                    backgroundColor: '#fee2e2', 
+                    color: '#991b1b', 
+                    padding: '16px', 
+                    borderRadius: '12px', 
+                    textAlign: 'center',
+                    fontWeight: '800',
+                    border: '2px solid #ef4444',
+                    fontSize: '1.2rem'
+                  }}>
+                    🔴 Esta propiedad ya ha sido vendida
+                  </div>
+                ) : (
+                  <Link 
+                    to={`/pagar/${data.idPublicacion}?monto=${data.precio}`}
+                    className="button button-primary btn-full"
+                    style={{ height: '52px', fontSize: '1.1rem' }}
+                  >
+                    💳 Proceder al Pago
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
         </section>
 

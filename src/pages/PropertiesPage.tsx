@@ -10,6 +10,7 @@ interface Publicacion {
   habitaciones: number
   banos: number
   metraje: number
+  estado?: string
 }
 
 const tones = ['tone-a', 'tone-b', 'tone-c', 'tone-d', 'tone-e', 'tone-f']
@@ -43,7 +44,16 @@ export function PropertiesPage() {
         if (contentType && contentType.includes('application/json')) {
           const data = await response.json()
           if (Array.isArray(data)) {
-            setPublicaciones(data)
+            // Normalize and Filter out sold properties
+            const activePublicaciones = data
+              .map((pub: any) => ({
+                ...pub,
+                idPublicacion: pub.idPublicacion ?? pub.idpublicacion,
+                estado: pub.estado?.toLowerCase()
+              }))
+              .filter((pub: any) => pub.estado !== 'vendido')
+            
+            setPublicaciones(activePublicaciones)
           } else {
             setPublicaciones([]) // Ensure it's an array
             setErrorMsg('No hay publicaciones disponibles')

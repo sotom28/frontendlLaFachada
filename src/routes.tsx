@@ -3,11 +3,12 @@ import { MainLayout } from './layouts/MainLayout.tsx'
 import { CreatePropertyPage } from './pages/CreatePropertyPage.tsx'
 import { HomePage } from './pages/HomePage.tsx'
 import { LoginPage } from './pages/LoginPage.tsx'
-import { RecoverPasswordPage } from './pages/RecoverPasswordPage'
+import { RecoverPasswordPage } from './pages/RecoverPasswordPage.tsx'
 import { PropertiesPage } from './pages/PropertiesPage.tsx'
 import { PropertyDetailPage } from './pages/PropertyDetailPage.tsx'
 import { RegisterPage } from './pages/RegisterPage.tsx'
 import { TermsPage } from './pages/TermsPage'
+import { PaymentsPage } from './pages/PaymentsPage.tsx'
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ export const router = createBrowserRouter([
       {
         path: 'crear-propiedad',
         element: <CreatePropertyPage />,
+      },
+      {
+        path: 'pagar/:idPublicacion',
+        element: <PaymentsPage />,
       },
       {
         path: 'iniciar-sesion',
