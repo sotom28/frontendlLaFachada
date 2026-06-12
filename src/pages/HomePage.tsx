@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { PropertyCard } from '../components/PropertyCard'
 
 interface Publicacion {
   idPublicacion: number
@@ -11,6 +12,7 @@ interface Publicacion {
   banos: number
   metraje: number
   estado?: string
+  fotos?: { url: string; nombre: string }[]
 }
 
 // Tones for styling the empty images, same as defined in App.css
@@ -48,6 +50,7 @@ export function HomePage() {
               .map((pub: any) => ({
                 ...pub,
                 idPublicacion: pub.idPublicacion ?? pub.idpublicacion,
+                fotos: pub.fotos || [],
                 estado: pub.estado?.toLowerCase()
               }))
               .filter((pub: any) => pub.estado !== 'vendido')
@@ -124,29 +127,7 @@ export function HomePage() {
         ) : (
           <div className="property-grid-cards">
             {publicaciones.map((pub, index) => (
-              <article key={pub.idPublicacion} className="property-card-modern">
-                <div className={`property-image ${tones[index % tones.length]}`}>
-                  <span className="property-price">
-                    {new Intl.NumberFormat('es-CO', { 
-                      style: 'currency', 
-                      currency: 'COP',
-                      maximumFractionDigits: 0 
-                    }).format(pub.precio)}
-                  </span>
-                </div>
-                <div className="property-body">
-                  <h3>{pub.titulo}</h3>
-                  <p>{pub.ciudad}</p>
-                  <div className="property-meta">
-                    <span>{pub.habitaciones} hab</span>
-                    <span>{pub.banos} baños</span>
-                    <span>{pub.metraje} m²</span>
-                  </div>
-                  <Link to={`/propiedades/${pub.idPublicacion}`} className="button button-primary btn-full">
-                    Ver Detalles
-                  </Link>
-                </div>
-              </article>
+              <PropertyCard key={pub.idPublicacion} pub={pub} index={index} />
             ))}
           </div>
         )}

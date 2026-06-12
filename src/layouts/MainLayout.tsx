@@ -1,27 +1,31 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import logoLaFachada from '../assets/logolafachada.webp'
-import { useAuth } from '../context/AuthContext'
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import logoLaFachada from "../assets/logolafachada.webp";
+import { useAuth } from "../context/AuthContext";
 
 const navItems = [
-  { label: 'Inicio', to: '/' },
-  { label: 'Propiedades', to: '/propiedades' },
-]
+  { label: "Inicio", to: "/" },
+  { label: "Propiedades", to: "/propiedades" },
+];
 
 export function MainLayout() {
-  const { user, isAuthenticated, logout } = useAuth()
-  const navigate = useNavigate()
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout()
-    navigate('/iniciar-sesion')
-  }
+    logout();
+    navigate("/iniciar-sesion");
+  };
 
   return (
     <div className="app-layout">
       <header className="site-header">
         <div className="site-header-inner">
           <NavLink className="brand" to="/">
-            <img src={logoLaFachada} alt="Logo La Fachada" className="brand-logo" />
+            <img
+              src={logoLaFachada}
+              alt="Logo La Fachada"
+              className="brand-logo"
+            />
             <span>La Fachada</span>
           </NavLink>
           <nav className="route-nav" aria-label="Navegacion principal">
@@ -29,9 +33,9 @@ export function MainLayout() {
               <NavLink
                 key={item.to}
                 to={item.to}
-                end={item.to === '/'}
+                end={item.to === "/"}
                 className={({ isActive }) =>
-                  isActive ? 'route-link route-link-active' : 'route-link'
+                  isActive ? "route-link route-link-active" : "route-link"
                 }
               >
                 {item.label}
@@ -39,29 +43,38 @@ export function MainLayout() {
             ))}
 
             {isAuthenticated && user?.idRol === 1 && (
-              <NavLink 
-                to="/crear-propiedad" 
+              <NavLink
+                to="/crear-propiedad"
                 className={({ isActive }) =>
-                  isActive ? 'route-link route-link-active' : 'route-link'
+                  isActive ? "route-link route-link-active" : "route-link"
                 }
               >
                 Crear Publicación
               </NavLink>
             )}
-            
+
             {!isAuthenticated ? (
               <>
-                <NavLink to="/iniciar-sesion" className="route-link route-link-ghost">
+                <NavLink
+                  to="/iniciar-sesion"
+                  className="route-link route-link-ghost"
+                >
                   Iniciar Sesión
                 </NavLink>
-                <NavLink to="/registrarse" className="route-link route-link-cta">
+                <NavLink
+                  to="/registrarse"
+                  className="route-link route-link-cta"
+                >
                   Registrarse
                 </NavLink>
               </>
             ) : (
               <div className="user-nav">
                 <span className="user-name">Hola, {user?.nombre}</span>
-                <button onClick={handleLogout} className="route-link route-link-ghost">
+                <button
+                  onClick={handleLogout}
+                  className="route-link route-link-ghost"
+                >
                   Cerrar Sesión
                 </button>
               </div>
@@ -72,5 +85,5 @@ export function MainLayout() {
 
       <Outlet />
     </div>
-  )
+  );
 }
