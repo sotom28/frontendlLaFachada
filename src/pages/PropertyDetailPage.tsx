@@ -59,6 +59,32 @@ export function PropertyDetailPage() {
     const [reviewMessage, setReviewMessage] = useState({ type: "", text: "" });
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // Agenda state
+    const [showAgendaForm, setShowAgendaForm] = useState(false);
+    const [agendaData, setAgendaData] = useState({
+        descripcion: "",
+        fecha: "",
+    });
+    const [submittingAgenda, setSubmittingAgenda] = useState(false);
+    const [agendaMessage, setAgendaMessage] = useState({ type: "", text: "" });
+    const [hasPendingAgenda, setHasPendingAgenda] = useState(false);
+
+    const checkPendingAgenda = async (userId: number, publicationId: number) => {
+        try {
+            const res = await fetch(`http://localhost:3000/api/v0/agenda/cliente/${userId}/publicaciones-pendientes`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (res.ok) {
+                const pendingIds: number[] = await res.json();
+                setHasPendingAgenda(pendingIds.includes(publicationId));
+            }
+        } catch (error) {
+            console.error("Error checking pending agenda:", error);
+        }
+    };
+
     const fetchDetalle = async () => {
         try {
             const headers: HeadersInit = {
@@ -155,6 +181,11 @@ export function PropertyDetailPage() {
                 },
             };
             setData(normalizedData);
+
+            // Check for pending agenda if user is logged in
+            if (user && normalizedData.idPublicacion) {
+                checkPendingAgenda(user.idUsuario, normalizedData.idPublicacion);
+            }
         } catch (error) {
             setErrorMsg("Error al conectar con el servidor");
         } finally {
@@ -262,6 +293,53 @@ export function PropertyDetailPage() {
             alert("Error de conexión al intentar eliminar");
         } finally {
             setIsDeleting(false);
+        }
+    };
+
+    const handleAgendaSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!user || !data) return;
+
+        setSubmittingAgenda(true);
+        setAgendaMessage({ type: "", text: "" });
+
+        const payload = {
+            idPublicacion: data.idPublicacion,
+            idVendedor: data.vendedorId,
+            clienteMensaje: agendaData.descripcion,
+            fecha: agendaData.fecha,
+            idCliente: user.idUsuario,
+        };
+
+        try {
+            const response = await fetch("http://localhost:3000/api/v0/agenda", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                setAgendaMessage({
+                    type: "success",
+                    text: "¡Cita agendada con éxito!",
+                });
+                setAgendaData({ descripcion: "", fecha: "" });
+                setHasPendingAgenda(true);
+                setTimeout(() => setShowAgendaForm(false), 2000);
+            } else {
+                const errorData = await response.json();
+                setAgendaMessage({
+                    type: "error",
+                    text: errorData.message || "Error al agendar la cita",
+                });
+            }
+        } catch (error) {
+            setAgendaMessage({ type: "error", text: "Error de conexión" });
+        } finally {
+            setSubmittingAgenda(false);
         }
     };
 
@@ -614,12 +692,94 @@ export function PropertyDetailPage() {
                                     <p className="seller-status">Vendedor Verificado</p>
                                 </div>
                             </div>
-                            <button
-                                className="button button-primary btn-full"
-                                style={{ marginTop: "20px" }}
-                            >
-                                Contactar Vendedor
-                            </button>
+
+                            {isAuthenticated && user?.idUsuario !== data.vendedorId ? (
+                                <>
+                                    {hasPendingAgenda ? (
+                                        <div style={{ 
+                                            marginTop: "20px", 
+                                            padding: "15px", 
+                                            backgroundColor: "#fff7ed", 
+                                            borderRadius: "8px", 
+                                            border: "1px solid #ffedd5",
+                                            color: "#9a3412",
+                                            textAlign: "center"
+                                        }}>
+                                            <p style={{ fontWeight: "600", fontSize: "0.9rem" }}>
+                                                ⏳ Agenda en Proceso
+                                            </p>
+                                            <p style={{ fontSize: "0.8rem", marginTop: "5px" }}>
+                                                Ya tienes una solicitud pendiente para esta propiedad. Por favor, espera a que el vendedor responda.
+                                            </p>
+                                        </div>
+                                    ) : !showAgendaForm ? (
+                                        <button
+                                            className="button button-primary btn-full"
+                                            style={{ marginTop: "20px" }}
+                                            onClick={() => setShowAgendaForm(true)}
+                                        >
+                                            Agendar Cita
+                                        </button>
+                                    ) : (
+                                        <div style={{ marginTop: "20px", padding: "15px", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                                            <h4 style={{ marginBottom: "15px", fontSize: "1rem" }}>Programar Visita</h4>
+                                            <form onSubmit={handleAgendaSubmit}>
+                                                {agendaMessage.text && (
+                                                    <div className={`message-banner ${agendaMessage.type}`} style={{ marginBottom: "10px", padding: "8px", fontSize: "0.85rem", borderRadius: "4px", backgroundColor: agendaMessage.type === "success" ? "#dcfce7" : "#fee2e2", color: agendaMessage.type === "success" ? "#166534" : "#991b1b" }}>
+                                                        {agendaMessage.text}
+                                                    </div>
+                                                )}
+                                                <div style={{ marginBottom: "12px" }}>
+                                                    <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", marginBottom: "4px" }}>Fecha:</label>
+                                                    <input
+                                                        type="date"
+                                                        required
+                                                        style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #cbd5e1" }}
+                                                        value={agendaData.fecha}
+                                                        onChange={(e) => setAgendaData({ ...agendaData, fecha: e.target.value })}
+                                                        min={new Date().toISOString().split('T')[0]}
+                                                    />
+                                                </div>
+                                                <div style={{ marginBottom: "12px" }}>
+                                                    <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", marginBottom: "4px" }}>Descripción:</label>
+                                                    <textarea
+                                                        placeholder="Ej: Me gustaría ver la propiedad por la tarde..."
+                                                        required
+                                                        style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #cbd5e1", minHeight: "80px", resize: "vertical" }}
+                                                        value={agendaData.descripcion}
+                                                        onChange={(e) => setAgendaData({ ...agendaData, descripcion: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div style={{ display: "flex", gap: "10px" }}>
+                                                    <button
+                                                        type="submit"
+                                                        className="button button-primary"
+                                                        disabled={submittingAgenda}
+                                                        style={{ flex: 1 }}
+                                                    >
+                                                        {submittingAgenda ? "Enviando..." : "Confirmar"}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="button"
+                                                        onClick={() => setShowAgendaForm(false)}
+                                                        style={{ flex: 1, backgroundColor: "#e2e8f0", color: "#475569" }}
+                                                    >
+                                                        Cancelar
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    )}
+                                </>
+                            ) : !isAuthenticated ? (
+                                <div className="login-prompt" style={{ marginTop: "20px" }}>
+                                    <p style={{ fontSize: "0.9rem", color: "#64748b" }}>Inicia sesión para agendar una cita.</p>
+                                    <Link to="/iniciar-sesion" className="button button-ghost btn-full" style={{ marginTop: "10px" }}>
+                                        Iniciar Sesión
+                                    </Link>
+                                </div>
+                            ) : null}
                         </div>
 
                         <div className="safety-card">

@@ -53,6 +53,17 @@ export function MainLayout() {
               </NavLink>
             )}
 
+            {isAuthenticated && (
+              <NavLink
+                to="/agendas"
+                className={({ isActive }) =>
+                  isActive ? "route-link route-link-active" : "route-link"
+                }
+              >
+                Mis Agendas
+              </NavLink>
+            )}
+
             {!isAuthenticated ? (
               <>
                 <NavLink

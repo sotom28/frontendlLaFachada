@@ -9,6 +9,7 @@ import { PropertyDetailPage } from './pages/PropertyDetailPage.tsx'
 import { RegisterPage } from './pages/RegisterPage.tsx'
 import { TermsPage } from './pages/TermsPage'
 import { PaymentsPage } from './pages/PaymentsPage.tsx'
+import { AgendasPage } from './pages/AgendasPage.tsx'
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
       {
         path: 'crear-propiedad',
         element: <CreatePropertyPage />,
+      },
+      {
+        path: 'agendas',
+        element: <AgendasPage />,
       },
       {
         path: 'pagar/:idPublicacion',
