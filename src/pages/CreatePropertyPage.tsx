@@ -135,10 +135,10 @@ export function CreatePropertyPage() {
         });
         setLoading(false);
       }
-    } catch (error) {
+    } catch (err) {
       setMessage({
         type: "error",
-        text: "Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo.",
+        text: "Ocurrió un error al procesar la solicitud. Por favor, inténtelo de nuevo",
       });
       setLoading(false);
     }
@@ -495,7 +495,13 @@ export function CreatePropertyPage() {
                 <option value={3}>Santiago</option>
                 <option value={4}>Concepción</option>
                 <option value={5}>Antofagasta</option>
-                <option value={6}>La Serena</option>
+                <option value={6}>Calama</option>
+                <option value={7}>La Serena</option>
+                <option value={8}>Coquimbo</option>
+                <option value={9}>Rancagua</option>
+                <option value={10}>Talca</option>
+                <option value={11}>Puerto Montt</option>
+                <option value={12}>Punta Arenas</option>
               </select>
             </label>
 

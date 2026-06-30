@@ -16,7 +16,7 @@ interface Publicacion {
 }
 
 // Tones for styling the empty images, same as defined in App.css
-const tones = ['tone-a', 'tone-b', 'tone-c', 'tone-d', 'tone-e', 'tone-f']
+// const tones = ['tone-a', 'tone-b', 'tone-c', 'tone-d', 'tone-e', 'tone-f']
 
 export function HomePage() {
   const [publicaciones, setPublicaciones] = useState<Publicacion[]>([])
@@ -31,7 +31,7 @@ export function HomePage() {
         const headers: HeadersInit = {
           'Content-Type': 'application/json',
         }
-        
+
         if (token) {
           headers['Authorization'] = `Bearer ${token}`
         }
@@ -39,9 +39,9 @@ export function HomePage() {
         const response = await fetch('http://localhost:3000/api/v1/views/publicaciones-containers', {
           headers
         })
-        
+
         const contentType = response.headers.get('content-type')
-        
+
         if (contentType && contentType.includes('application/json')) {
           const data = await response.json()
           if (Array.isArray(data)) {
@@ -54,7 +54,7 @@ export function HomePage() {
                 estado: pub.estado?.toLowerCase()
               }))
               .filter((pub: any) => pub.estado !== 'vendido')
-            
+
             setPublicaciones(activePublicaciones.slice(0, 3))
           } else {
             setErrorMsg('No hay publicaciones disponibles')

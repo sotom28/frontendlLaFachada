@@ -44,7 +44,7 @@ export function LoginPage() {
         setError(data.message || 'Credenciales incorrectas')
       }
     } catch (err) {
-      setError('Error de conexión con el servidor')
+      setError('Error de conexión con el servidor ' + err)
     } finally {
       setLoading(false)
     }

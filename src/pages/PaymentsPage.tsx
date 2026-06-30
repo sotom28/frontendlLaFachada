@@ -63,7 +63,7 @@ export function PaymentsPage() {
         setMessage({ type: 'error', text: data.message || 'Error al procesar el pago. Verifique sus datos.' })
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Error de conexión con la pasarela de pagos.' })
+      setMessage({ type: 'error', text: 'Error de conexión con la pasarela de pagos.'})
     } finally {
       setLoading(false)
     }

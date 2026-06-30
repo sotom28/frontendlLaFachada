@@ -941,3 +941,159 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Sidebar layout for properties */
+.properties-container-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+/* Sidebar filter section styled like Mercado Libre */
+.properties-sidebar {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  height: fit-content;
+  position: sticky;
+  top: 90px;
+  transition: all 0.3s ease;
+}
+
+.sidebar-filter-group h3 {
+  font-size: 1.1rem;
+  color: #0f172a;
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-weight: 700;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 8px;
+}
+
+.filter-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-link-btn {
+  background: none;
+  border: none;
+  color: #475569;
+  font-size: 0.95rem;
+  font-family: inherit;
+  text-align: left;
+  padding: 6px 8px;
+  border-radius: 8px;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filter-link-btn:hover {
+  background: #f1f5f9;
+  color: #2563eb;
+  padding-left: 12px;
+}
+
+.filter-link-btn.active {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 700;
+  padding-left: 12px;
+  border-left: 3px solid #2563eb;
+}
+
+.clear-filter-btn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 8px;
+  font-size: 0.85rem;
+  justify-content: center;
+}
+
+/* Badge for active filter on top of results */
+.active-filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.active-filter-badge {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.remove-badge-btn {
+  background: none;
+  border: none;
+  color: #1d4ed8;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-badge-btn:hover {
+  color: #ef4444;
+}
+
+/* Responsive adjustment for filters sidebar */
+@media (max-width: 980px) {
+  .properties-container-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .properties-sidebar {
+    position: static;
+    padding: 16px;
+  }
+
+  .filter-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .filter-link-btn {
+    width: auto;
+    background: #f1f5f9;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+  }
+
+  .filter-link-btn:hover {
+    padding-left: 14px;
+  }
+
+  .filter-link-btn.active {
+    padding-left: 14px;
+    border-left: none;
+    background: #2563eb;
+    color: #ffffff;
+  }
+}
